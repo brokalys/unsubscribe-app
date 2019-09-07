@@ -27,3 +27,8 @@ p {
 .feedback-error {
   color: #721c24;
 }
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+}

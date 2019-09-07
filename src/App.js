@@ -14,23 +14,35 @@ class App extends React.Component {
       error: false,
       key: params.key,
       id: params.id,
+      all: false,
     };
 
     this.unsubscribe = this.unsubscribe.bind(this);
+    this.toggleAllState = this.toggleAllState.bind(this);
   }
 
   async unsubscribe() {
     try {
       await axios.post('https://api.brokalys.com/', {
-        query: `mutation {
-          unsubscribePinger(id: ${this.state.id}, unsubscribe_key: "${this.state.key}")
-        }`
+        query: `
+          mutation {
+            unsubscribePinger(
+              id: ${this.state.id},
+              unsubscribe_key: "${this.state.key}",
+              all: ${Boolean(this.state.all)},
+            )
+          }
+        `
       });
 
       this.setState({ success: true });
     } catch (e) {
       this.setState({ error: true });
     }
+  }
+
+  toggleAllState() {
+    this.setState({ all: !this.state.all });
   }
 
   render() {
@@ -56,6 +68,7 @@ class App extends React.Component {
       <div>
         <p>Are You sure You want to unsubscribe?</p>
         <button onClick={this.unsubscribe}>Yes, don't send me PINGER emails anymore</button>
+        <label><input type="checkbox" onChange={this.toggleAllState} />Unsubscribe from ALL pingers fro this email address</label>
       </div>
     );
   }
