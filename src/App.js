@@ -1,77 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import queryString from 'query-string';
 import './App.css';
 
-class App extends React.Component {
-  constructor() {
-    super();
+function App() {
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+  const [key, setKey] = useState();
+  const [id, setId] = useState();
+  const [all, setAll] = useState(false);
 
+  useEffect(() => {
     const params = queryString.parse(window.location.search);
 
-    this.state = {
-      success: false,
-      error: false,
-      key: params.key,
-      id: params.id,
-      all: false,
-    };
+    setKey(params.key);
+    setId(params.id);
+  }, []);
 
-    this.unsubscribe = this.unsubscribe.bind(this);
-    this.toggleAllState = this.toggleAllState.bind(this);
-  }
-
-  async unsubscribe() {
+  async function unsubscribe() {
     try {
       await axios.post('https://api.brokalys.com/', {
         query: `
           mutation {
             unsubscribePinger(
-              id: ${this.state.id},
-              unsubscribe_key: "${this.state.key}",
-              all: ${Boolean(this.state.all)},
+              id: ${id},
+              unsubscribe_key: "${key}",
+              all: ${Boolean(all)},
             )
           }
         `
       });
 
-      this.setState({ success: true });
+      setSuccess(true);
     } catch (e) {
-      this.setState({ error: true });
+      setError(true);
     }
   }
 
-  toggleAllState() {
-    this.setState({ all: !this.state.all });
+  function toggleAllState() {
+    setAll(!all);
   }
 
-  render() {
-    if (!this.state.key || !this.state.id) {
-      return (
-        <p className="feedback-error">Invalid unsubscribe link.</p>
-      );
-    }
-
-    if (this.state.success) {
-      return (
-        <p className="feedback-success">Unsubscribed succesfully.</p>
-      );
-    }
-
-    if (this.state.error) {
-      return (
-        <p className="feedback-error">Failed unsubscribing. Please try again later.</p>
-      );
-    }
-
+  if (!key || !id) {
     return (
-      <div>
-        <p>Are You sure You want to unsubscribe?</p>
-        <button onClick={this.unsubscribe}>Yes, don't send me PINGER emails anymore</button>
-        <label><input type="checkbox" onChange={this.toggleAllState} />Unsubscribe from ALL pingers fro this email address</label>
-      </div>
+      <p className="feedback-error">Invalid unsubscribe link.</p>
     );
   }
+
+  if (success) {
+    return (
+      <p className="feedback-success">Unsubscribed succesfully.</p>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="feedback-error">Failed unsubscribing. Please try again later.</p>
+    );
+  }
+
+  return (
+    <div>
+      <p>Are You sure You want to unsubscribe?</p>
+      <button onClick={unsubscribe}>Yes, don't send me PINGER emails anymore</button>
+      <label><input type="checkbox" onChange={toggleAllState} />Unsubscribe from ALL pingers fro this email address</label>
+    </div>
+  );
 }
 
 export default App;
