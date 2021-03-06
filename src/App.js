@@ -23,7 +23,7 @@ function App() {
         query: `
           mutation {
             unsubscribePinger(
-              id: ${id},
+              id: "${id}",
               unsubscribe_key: "${key}",
               all: ${Boolean(all)},
             )
